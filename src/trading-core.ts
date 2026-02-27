@@ -44,6 +44,9 @@ import { IpcServer } from './ipc/server.js';
 import { ApiServer } from './api/server.js';
 import { McpHttpServer } from './mcp/http-server.js';
 
+// Cross-Brain
+import { CrossBrainClient } from '@timmeck/brain-core';
+
 export class TradingCore {
   private db: Database.Database | null = null;
   private ipcServer: IpcServer | null = null;
@@ -51,6 +54,7 @@ export class TradingCore {
   private mcpHttpServer: McpHttpServer | null = null;
   private learningEngine: LearningEngine | null = null;
   private researchEngine: ResearchEngine | null = null;
+  private crossBrain: CrossBrainClient | null = null;
   private config: TradingBrainConfig | null = null;
   private configPath?: string;
   private restarting = false;
@@ -148,7 +152,10 @@ export class TradingCore {
     services.learning = this.learningEngine;
     services.research = this.researchEngine;
 
-    // 12. IPC Server
+    // 12. Cross-Brain Client
+    this.crossBrain = new CrossBrainClient('trading-brain');
+
+    // 13. IPC Server
     const router = new IpcRouter(services);
     this.ipcServer = new IpcServer(router, config.ipc.pipeName);
     this.ipcServer.start();

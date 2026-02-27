@@ -13,13 +13,14 @@ import { importCommand } from './cli/commands/import.js';
 import { configCommand } from './cli/commands/config.js';
 import { doctorCommand } from './cli/commands/doctor.js';
 import { dashboardCommand } from './cli/commands/dashboard.js';
+import { peersCommand } from './cli/commands/peers.js';
 
 const program = new Command();
 
 program
   .name('trading')
   .description('Trading Brain — Adaptive Trading Intelligence & Signal Learning System')
-  .version('1.0.0');
+  .version('1.1.0');
 
 program.addCommand(startCommand());
 program.addCommand(stopCommand());
@@ -33,6 +34,7 @@ program.addCommand(importCommand());
 program.addCommand(configCommand());
 program.addCommand(doctorCommand());
 program.addCommand(dashboardCommand());
+program.addCommand(peersCommand());
 
 // Hidden command: run MCP server (called by Claude Code)
 program

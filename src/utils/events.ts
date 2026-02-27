@@ -1,6 +1,6 @@
-import { EventEmitter } from 'node:events';
+import { TypedEventBus as GenericEventBus } from '@timmeck/brain-core';
 
-export interface TradingBrainEvents {
+export type TradingBrainEvents = {
   'trade:recorded': { tradeId: number; fingerprint: string; win: boolean };
   'synapse:updated': { synapseId: string; weight: number };
   'rule:learned': { ruleId: number; pattern: string; confidence: number };
@@ -10,27 +10,11 @@ export interface TradingBrainEvents {
   'decay:applied': { synapseCount: number; edgeCount: number };
   'patterns:extracted': { ruleCount: number };
   'research:completed': { insightCount: number };
-}
+};
 
 export type TradingBrainEventName = keyof TradingBrainEvents;
 
-export class TypedEventBus extends EventEmitter {
-  emit<K extends TradingBrainEventName>(event: K, data: TradingBrainEvents[K]): boolean {
-    return super.emit(event, data);
-  }
-
-  on<K extends TradingBrainEventName>(event: K, listener: (data: TradingBrainEvents[K]) => void): this {
-    return super.on(event, listener);
-  }
-
-  once<K extends TradingBrainEventName>(event: K, listener: (data: TradingBrainEvents[K]) => void): this {
-    return super.once(event, listener);
-  }
-
-  off<K extends TradingBrainEventName>(event: K, listener: (data: TradingBrainEvents[K]) => void): this {
-    return super.off(event, listener);
-  }
-}
+export class TypedEventBus extends GenericEventBus<TradingBrainEvents> {}
 
 let busInstance: TypedEventBus | null = null;
 

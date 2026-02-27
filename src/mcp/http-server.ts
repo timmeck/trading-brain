@@ -1,118 +1,20 @@
-import http from 'node:http';
-import { randomUUID } from 'node:crypto';
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { SSEServerTransport } from '@modelcontextprotocol/sdk/server/sse.js';
-import { getLogger } from '../utils/logger.js';
+import { McpHttpServer as CoreMcpHttpServer } from '@timmeck/brain-core';
 import type { IpcRouter } from '../ipc/router.js';
 import { registerToolsDirect } from './tools.js';
 
 export class McpHttpServer {
-  private server: http.Server | null = null;
-  private transports = new Map<string, SSEServerTransport>();
-  private logger = getLogger();
+  private inner: CoreMcpHttpServer;
 
-  constructor(
-    private port: number,
-    private router: IpcRouter,
-  ) {}
-
-  start(): void {
-    this.server = http.createServer((req, res) => {
-      res.setHeader('Access-Control-Allow-Origin', '*');
-      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
-      res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
-      if (req.method === 'OPTIONS') { res.writeHead(204); res.end(); return; }
-
-      const url = new URL(req.url ?? '/', `http://localhost:${this.port}`);
-
-      if (url.pathname === '/sse' && req.method === 'GET') { this.handleSSE(res); return; }
-      if (url.pathname === '/messages' && req.method === 'POST') { this.handleMessage(req, res, url); return; }
-
-      if (url.pathname === '/' && req.method === 'GET') {
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({
-          name: 'trading-brain',
-          version: '1.0.0',
-          protocol: 'MCP',
-          transport: 'sse',
-          endpoints: { sse: '/sse', messages: '/messages' },
-          clients: this.transports.size,
-        }));
-        return;
-      }
-
-      res.writeHead(404, { 'Content-Type': 'text/plain' });
-      res.end('Not Found');
-    });
-
-    this.server.listen(this.port, () => {
-      this.logger.info(`MCP HTTP server (SSE) started on http://localhost:${this.port}`);
-    });
+  constructor(port: number, router: IpcRouter) {
+    this.inner = new CoreMcpHttpServer(
+      port,
+      router,
+      { name: 'trading-brain', version: '1.1.0' },
+      (server, _r) => registerToolsDirect(server, router),
+    );
   }
 
-  stop(): void {
-    for (const transport of this.transports.values()) {
-      try { transport.close?.(); } catch { /* ignore */ }
-    }
-    this.transports.clear();
-    this.server?.close();
-    this.server = null;
-    this.logger.info('MCP HTTP server stopped');
-  }
-
-  getClientCount(): number {
-    return this.transports.size;
-  }
-
-  private async handleSSE(res: http.ServerResponse): Promise<void> {
-    try {
-      const transport = new SSEServerTransport('/messages', res);
-      const sessionId = transport.sessionId ?? randomUUID();
-      this.transports.set(sessionId, transport);
-
-      const server = new McpServer({ name: 'trading-brain', version: '1.0.0' });
-      registerToolsDirect(server, this.router);
-
-      res.on('close', () => {
-        this.transports.delete(sessionId);
-        this.logger.debug(`MCP SSE client disconnected: ${sessionId}`);
-      });
-
-      await server.connect(transport);
-      this.logger.info(`MCP SSE client connected: ${sessionId}`);
-    } catch (err) {
-      this.logger.error('MCP SSE connection error:', err);
-      if (!res.headersSent) {
-        res.writeHead(500, { 'Content-Type': 'text/plain' });
-        res.end('Internal Server Error');
-      }
-    }
-  }
-
-  private async handleMessage(req: http.IncomingMessage, res: http.ServerResponse, url: URL): Promise<void> {
-    try {
-      const sessionId = url.searchParams.get('sessionId');
-      if (!sessionId) {
-        res.writeHead(400, { 'Content-Type': 'text/plain' });
-        res.end('Missing sessionId parameter');
-        return;
-      }
-
-      const transport = this.transports.get(sessionId);
-      if (!transport) {
-        res.writeHead(404, { 'Content-Type': 'text/plain' });
-        res.end('Session not found. Connect to /sse first.');
-        return;
-      }
-
-      await transport.handlePostMessage(req, res);
-    } catch (err) {
-      this.logger.error('MCP message error:', err);
-      if (!res.headersSent) {
-        res.writeHead(500, { 'Content-Type': 'text/plain' });
-        res.end('Internal Server Error');
-      }
-    }
-  }
+  start(): void { this.inner.start(); }
+  stop(): void { this.inner.stop(); }
+  getClientCount(): number { return this.inner.getClientCount(); }
 }

@@ -108,6 +108,15 @@ export class IpcRouter {
         // This will be wired in TradingCore
         return { success: true, message: 'Reset not available via IPC — use CLI' };
       }],
+
+      // ─── Status (cross-brain) ─────────────────────────────
+      ['status', () => ({
+        name: 'trading-brain',
+        version: '1.1.0',
+        uptime: Math.floor(process.uptime()),
+        pid: process.pid,
+        methods: this.listMethods().length,
+      })],
     ]);
   }
 }
