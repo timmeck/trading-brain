@@ -1,5 +1,10 @@
 # Trading Brain
 
+[![npm version](https://img.shields.io/npm/v/@timmeck/trading-brain)](https://www.npmjs.com/package/@timmeck/trading-brain)
+[![npm downloads](https://img.shields.io/npm/dm/@timmeck/trading-brain)](https://www.npmjs.com/package/@timmeck/trading-brain)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/timmeck/trading-brain)](https://github.com/timmeck/trading-brain)
+
 **Adaptive Trading Intelligence & Signal Learning System for Claude Code**
 
 Trading Brain is an MCP server that gives Claude Code a persistent trading memory. It learns from every trade outcome — strengthening connections between signals, strategies, and results through a Hebbian synapse network. Over time, it develops confidence in signal combinations, adapts calibration parameters, and surfaces research insights about your trading patterns.
