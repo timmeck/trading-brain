@@ -14,13 +14,14 @@ import { configCommand } from './cli/commands/config.js';
 import { doctorCommand } from './cli/commands/doctor.js';
 import { dashboardCommand } from './cli/commands/dashboard.js';
 import { peersCommand } from './cli/commands/peers.js';
+import { checkForUpdate, getCurrentVersion } from './cli/update-check.js';
 
 const program = new Command();
 
 program
   .name('trading')
   .description('Trading Brain — Adaptive Trading Intelligence & Signal Learning System')
-  .version('1.1.0');
+  .version(getCurrentVersion());
 
 program.addCommand(startCommand());
 program.addCommand(stopCommand());
@@ -57,3 +58,6 @@ program
   });
 
 program.parse();
+
+// Non-blocking update check after command finishes
+checkForUpdate();
