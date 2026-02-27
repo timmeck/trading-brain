@@ -18,7 +18,7 @@ export function queryCommand(): Command {
           return;
         }
         console.log(`  ${c.info(`Found ${results.length} trades:`)}\n`);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         
         for (const t of results) {
           const badge = t.win ? c.green('WIN') : c.red('LOSS');
           console.log(`  #${t.id} [${badge}] ${c.cyan(t.pair)} ${c.dim(t.fingerprint)} ${t.profit_pct.toFixed(2)}%`);

@@ -7,14 +7,12 @@ import type { WeightedGraph } from '../graph/weighted-graph.js';
 import type { CalibrationConfig, LearningConfig } from '../types/config.types.js';
 import { extractPatterns } from './pattern-extractor.js';
 import { calibrate } from './calibrator.js';
-import { getLogger } from '../utils/logger.js';
 import { getEventBus } from '../utils/events.js';
+import { BaseLearningEngine } from '@timmeck/brain-core';
 
-export class LearningEngine {
-  private timer: ReturnType<typeof setInterval> | null = null;
+export class LearningEngine extends BaseLearningEngine {
   private lastPatternExtraction = 0;
   private lastDecay = 0;
-  private logger = getLogger();
 
   constructor(
     private learningConfig: LearningConfig,
@@ -25,18 +23,8 @@ export class LearningEngine {
     private calRepo: CalibrationRepository,
     private synapseManager: SynapseManager,
     private graph: WeightedGraph,
-  ) {}
-
-  start(): void {
-    this.timer = setInterval(() => this.runCycle(), this.learningConfig.intervalMs);
-    this.logger.info(`Learning engine started (interval: ${this.learningConfig.intervalMs}ms)`);
-  }
-
-  stop(): void {
-    if (this.timer) {
-      clearInterval(this.timer);
-      this.timer = null;
-    }
+  ) {
+    super(learningConfig);
   }
 
   getCalibration(): CalibrationConfig {

@@ -15,7 +15,7 @@ export function rulesCommand(): Command {
           console.log(`  ${c.dim('No rules learned yet. Brain needs more trades.')}`);
           return;
         }
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         
         for (const r of rules) {
           const conf = Math.round(r.confidence * 100);
           const wr = Math.round(r.win_rate * 100);

@@ -18,7 +18,7 @@ export function networkCommand(): Command {
             return;
           }
           console.log(`  ${c.info('Spreading Activation from:')} ${c.value(opts.node)}\n`);
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+           
           for (const node of activated.slice(0, 20)) {
             const bar = c.cyan('█'.repeat(Math.round(node.activation * 20)));
             console.log(`  ${bar} ${c.dim(node.type)} ${c.value(node.label)} ${c.dim(`(${node.activation.toFixed(3)})`)}`);
@@ -32,7 +32,7 @@ export function networkCommand(): Command {
           console.log(keyValue('Graph Edges', stats.graphEdges));
           if (stats.strongest?.length > 0) {
             console.log(`\n  ${c.cyan.bold('Strongest Synapses:')}`);
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+             
             for (const s of stats.strongest) {
               console.log(`    ${c.green(s.weight.toFixed(3))} ${c.dim(`(${s.activations}x)`)} ${c.value(s.id)}`);
             }

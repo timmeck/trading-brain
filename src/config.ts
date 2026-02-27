@@ -1,7 +1,7 @@
 import path from 'node:path';
-import fs from 'node:fs';
 import type { TradingBrainConfig } from './types/config.types.js';
 import { getDataDir, getPipeName } from './utils/paths.js';
+import { loadConfigFile } from '@timmeck/brain-core';
 
 const defaults: TradingBrainConfig = {
   dataDir: getDataDir(),
@@ -68,36 +68,12 @@ function applyEnvOverrides(config: TradingBrainConfig): void {
   if (process.env['TRADING_BRAIN_MCP_HTTP_ENABLED']) config.mcpHttp.enabled = process.env['TRADING_BRAIN_MCP_HTTP_ENABLED'] !== 'false';
 }
 
-function deepMerge(target: Record<string, unknown>, source: Record<string, unknown>): void {
-  for (const key of Object.keys(source)) {
-    const val = source[key];
-    if (val && typeof val === 'object' && !Array.isArray(val) && target[key] && typeof target[key] === 'object') {
-      deepMerge(target[key] as Record<string, unknown>, val as Record<string, unknown>);
-    } else if (val !== undefined) {
-      target[key] = val;
-    }
-  }
-}
-
 export function loadConfig(configPath?: string): TradingBrainConfig {
-  const config = structuredClone(defaults);
-
-  if (configPath) {
-    const filePath = path.resolve(configPath);
-    if (fs.existsSync(filePath)) {
-      const raw = fs.readFileSync(filePath, 'utf-8');
-      const fileConfig = JSON.parse(raw) as Partial<TradingBrainConfig>;
-      deepMerge(config as unknown as Record<string, unknown>, fileConfig as unknown as Record<string, unknown>);
-    }
-  } else {
-    const defaultConfigPath = path.join(getDataDir(), 'config.json');
-    if (fs.existsSync(defaultConfigPath)) {
-      const raw = fs.readFileSync(defaultConfigPath, 'utf-8');
-      const fileConfig = JSON.parse(raw) as Partial<TradingBrainConfig>;
-      deepMerge(config as unknown as Record<string, unknown>, fileConfig as unknown as Record<string, unknown>);
-    }
-  }
-
+  const config = loadConfigFile(
+    defaults,
+    configPath,
+    path.join(getDataDir(), 'config.json'),
+  );
   applyEnvOverrides(config);
   return config;
 }

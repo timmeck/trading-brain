@@ -10,6 +10,7 @@ import type { ResearchEngine } from '../research/research-engine.js';
 import type { RuleRepository } from '../db/repositories/rule.repository.js';
 import type { ChainRepository } from '../db/repositories/chain.repository.js';
 import type { CalibrationRepository } from '../db/repositories/calibration.repository.js';
+import type { CrossBrainClient } from '@timmeck/brain-core';
 
 const logger = getLogger();
 
@@ -25,6 +26,7 @@ export interface Services {
   calRepo: CalibrationRepository;
   learning?: LearningEngine;
   research?: ResearchEngine;
+  crossBrain?: CrossBrainClient;
 }
 
 type MethodHandler = (params: unknown) => unknown;
@@ -107,6 +109,27 @@ export class IpcRouter {
       ['reset', () => {
         // This will be wired in TradingCore
         return { success: true, message: 'Reset not available via IPC — use CLI' };
+      }],
+
+      // ─── Cross-Brain Notifications ──────────────────────────
+      ['cross-brain.notify', (params) => {
+        const { source, event, data, timestamp } = p(params);
+        logger.info(`Cross-brain notification from ${source}: ${event}`);
+        return { received: true, source, event, timestamp };
+      }],
+
+      // ─── Ecosystem ────────────────────────────────────────
+      ['ecosystem.status', async () => {
+        if (!s.crossBrain) return { peers: [] };
+        const peers = await s.crossBrain.broadcast('status');
+        return { self: 'trading-brain', peers };
+      }],
+      ['ecosystem.queryPeer', async (params) => {
+        if (!s.crossBrain) throw new Error('Cross-brain client not available');
+        const { peer, method, args } = p(params);
+        const result = await s.crossBrain.query(peer, method, args);
+        if (result === null) throw new Error(`Peer '${peer}' not available`);
+        return result;
       }],
 
       // ─── Status (cross-brain) ─────────────────────────────

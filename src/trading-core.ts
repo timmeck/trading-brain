@@ -45,7 +45,7 @@ import { ApiServer } from './api/server.js';
 import { McpHttpServer } from './mcp/http-server.js';
 
 // Cross-Brain
-import { CrossBrainClient } from '@timmeck/brain-core';
+import { CrossBrainClient, CrossBrainNotifier } from '@timmeck/brain-core';
 
 export class TradingCore {
   private db: Database.Database | null = null;
@@ -55,6 +55,7 @@ export class TradingCore {
   private learningEngine: LearningEngine | null = null;
   private researchEngine: ResearchEngine | null = null;
   private crossBrain: CrossBrainClient | null = null;
+  private notifier: CrossBrainNotifier | null = null;
   private config: TradingBrainConfig | null = null;
   private configPath?: string;
   private restarting = false;
@@ -148,12 +149,14 @@ export class TradingCore {
     this.researchEngine.start();
     logger.info(`Research engine started (interval: ${config.research.intervalMs}ms)`);
 
-    // Expose engines to IPC
+    // Expose engines + cross-brain to IPC
     services.learning = this.learningEngine;
     services.research = this.researchEngine;
+    services.crossBrain = this.crossBrain ?? undefined;
 
-    // 12. Cross-Brain Client
+    // 12. Cross-Brain Client + Notifier
     this.crossBrain = new CrossBrainClient('trading-brain');
+    this.notifier = new CrossBrainNotifier(this.crossBrain, 'trading-brain');
 
     // 13. IPC Server
     const router = new IpcRouter(services);
@@ -258,10 +261,12 @@ export class TradingCore {
 
   private setupEventListeners(_synapseManager: SynapseManager): void {
     const bus = getEventBus();
+    const notifier = this.notifier;
 
-    // Trade recorded → log
+    // Trade recorded → log + notify brain (error correlation)
     bus.on('trade:recorded', ({ tradeId, fingerprint, win }) => {
       getLogger().info(`Trade #${tradeId} recorded: ${fingerprint} (${win ? 'WIN' : 'LOSS'})`);
+      notifier?.notifyPeer('brain', 'trade:outcome', { tradeId, fingerprint, win });
     });
 
     // Synapse updated → log at debug level
@@ -284,9 +289,10 @@ export class TradingCore {
       getLogger().info(`New insight #${insightId} (${type})`);
     });
 
-    // Calibration updated → log
+    // Calibration updated → log + notify peers (market regime change)
     bus.on('calibration:updated', ({ outcomeCount }) => {
       getLogger().info(`Calibration updated (${outcomeCount} outcomes)`);
+      notifier?.notify('signal:calibrated', { outcomeCount });
     });
   }
 }

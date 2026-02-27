@@ -1,8 +1,8 @@
 import type { TradeRepository, TradeRecord } from '../db/repositories/trade.repository.js';
 import type { InsightRepository } from '../db/repositories/insight.repository.js';
 import type { ResearchConfig } from '../types/config.types.js';
-import { getLogger } from '../utils/logger.js';
 import { getEventBus } from '../utils/events.js';
+import { BaseResearchEngine } from '@timmeck/brain-core';
 
 interface NewInsight {
   type: string;
@@ -23,30 +23,13 @@ function mode(arr: string[]): string | null {
   return maxVal;
 }
 
-export class ResearchEngine {
-  private timer: ReturnType<typeof setInterval> | null = null;
-  private logger = getLogger();
-
+export class ResearchEngine extends BaseResearchEngine {
   constructor(
     private config: ResearchConfig,
     private tradeRepo: TradeRepository,
     private insightRepo: InsightRepository,
-  ) {}
-
-  start(): void {
-    // Initial delay before first run
-    setTimeout(() => {
-      this.runCycle();
-      this.timer = setInterval(() => this.runCycle(), this.config.intervalMs);
-    }, this.config.initialDelayMs);
-    this.logger.info(`Research engine started (interval: ${this.config.intervalMs}ms)`);
-  }
-
-  stop(): void {
-    if (this.timer) {
-      clearInterval(this.timer);
-      this.timer = null;
-    }
+  ) {
+    super(config);
   }
 
   runCycle(): void {

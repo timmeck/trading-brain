@@ -74,7 +74,7 @@ describe('MessageDecoder', () => {
     const decoder = new MessageDecoder();
     const frame = encodeMessage(sampleMessage);
 
-    let messages: IpcMessage[] = [];
+    const messages: IpcMessage[] = [];
     for (let i = 0; i < frame.length; i++) {
       const result = decoder.feed(Buffer.from([frame[i]!]));
       messages.push(...result);

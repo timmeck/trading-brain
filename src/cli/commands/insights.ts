@@ -19,7 +19,7 @@ export function insightsCommand(): Command {
           console.log(`  ${c.dim('No insights found.')}`);
           return;
         }
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         
         for (const ins of results) {
           const sev = ins.severity === 'high' ? c.red(`[${ins.severity}]`) : ins.severity === 'medium' ? c.orange(`[${ins.severity}]`) : c.dim(`[${ins.severity}]`);
           console.log(`  ${sev} ${c.cyan(ins.type)} — ${c.value(ins.title)}`);

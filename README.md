@@ -206,6 +206,9 @@ These tools are available to Claude Code (and other MCP clients) when Trading Br
 | `trading_calibration` | Current adaptive calibration parameters |
 | `trading_learn` | Manually trigger a learning cycle |
 | `trading_reset` | Reset all data (use with caution) |
+| `trading_ecosystem_status` | Get status of all brains in the ecosystem |
+| `trading_query_peer` | Query another brain in the ecosystem (method + params) |
+| `trading_error_context` | Query Brain for errors that correlate with trade failures |
 
 ## REST API
 
@@ -317,14 +320,18 @@ Trading Brain is part of the **Brain Ecosystem** — a family of standalone MCP 
 | [Brain](https://github.com/timmeck/brain) | Error memory & code intelligence | 7777 / 7778 |
 | **Trading Brain** | Adaptive trading intelligence | **7779** / 7780 |
 | [Marketing Brain](https://github.com/timmeck/marketing-brain) | Content strategy & engagement | 7781 / 7782 |
-| [Brain Core](https://github.com/timmeck/brain-core) | Shared infrastructure (IPC, MCP, REST API, CLI) used by all brains | — |
+| [Brain Core](https://github.com/timmeck/brain-core) v1.6.0 | Shared infrastructure (IPC, MCP, REST, CLI, math, synapses) | — |
 | [Brain Hub](https://timmeck.github.io/brain-hub/) | Ecosystem landing page | — |
 
-Each brain is **fully standalone** — [Brain Core](https://www.npmjs.com/package/@timmeck/brain-core) provides shared infrastructure (IPC, MCP, REST API, CLI) used by all brains, eliminating ~2,200 lines of duplicated code.
+Each brain is **fully standalone** — [Brain Core](https://www.npmjs.com/package/@timmeck/brain-core) provides shared infrastructure (IPC, MCP, REST API, CLI, math, synapse algorithms) used by all brains, eliminating ~2,800 lines of duplicated code.
 
 ### Cross-Brain Communication
 
-Brains can discover and query each other at runtime using the `trading peers` CLI command and the CrossBrainClient IPC protocol. This enables cross-brain workflows — for example, Trading Brain can query Marketing Brain for sentiment context before weighting signals.
+Brains discover and query each other at runtime via IPC named pipes. Use `trading peers` to see online peers, or the `trading_query_peer` / `trading_ecosystem_status` MCP tools to access peer data from Claude Code. Brains push event notifications to peers — when Trading Brain records a trade outcome or calibrates signals, Brain and Marketing Brain are notified automatically.
+
+### Ecosystem Dashboard
+
+The interactive HTML dashboard (`trading dashboard`) includes an Ecosystem Peers section showing the live status of all connected brains.
 
 ## License
 

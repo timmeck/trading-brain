@@ -253,4 +253,60 @@ function registerToolsWithCaller(server: McpServer, call: BrainCall): void {
       return textResult(result);
     },
   );
+
+  // === Cross-Brain Ecosystem Tools ===
+
+  server.tool(
+    'trading_ecosystem_status',
+    'Get status of all brains in the ecosystem (brain, trading-brain, marketing-brain).',
+    {},
+    async () => {
+      const result: AnyResult = await call('ecosystem.status', {});
+      if (!result?.peers?.length) return textResult('No peer brains are currently running.');
+      const lines = result.peers.map((p: AnyResult) =>
+        `${p.name}: v${p.result?.version ?? '?'} (PID ${p.result?.pid ?? '?'}, uptime ${p.result?.uptime ?? '?'}s, ${p.result?.methods ?? '?'} methods)`
+      );
+      return textResult(`Ecosystem status:\n- trading-brain (self): running\n${lines.map((l: string) => `- ${l}`).join('\n')}`);
+    },
+  );
+
+  server.tool(
+    'trading_query_peer',
+    'Query another brain in the ecosystem. Call any method on brain or marketing-brain.',
+    {
+      peer: z.string().describe('Peer brain name: brain or marketing-brain'),
+      method: z.string().describe('IPC method to call (e.g. analytics.summary, error.query)'),
+      args: z.record(z.string(), z.unknown()).optional().describe('Method arguments as key-value pairs'),
+    },
+    async (params) => {
+      const result = await call('ecosystem.queryPeer', {
+        peer: params.peer,
+        method: params.method,
+        args: params.args ?? {},
+      });
+      return textResult(result);
+    },
+  );
+
+  server.tool(
+    'trading_error_context',
+    'Ask the Brain for errors that might correlate with trade failures. Useful for understanding why a trade went wrong.',
+    {
+      pair: z.string().describe('Trading pair (e.g. BTC/USDT)'),
+      search: z.string().optional().describe('Error search query (e.g. "timeout", "API error")'),
+    },
+    async (params) => {
+      const errors: AnyResult = await call('ecosystem.queryPeer', {
+        peer: 'brain',
+        method: 'error.query',
+        args: { search: params.search ?? params.pair },
+      });
+      if (!errors) return textResult('Brain not available.');
+      if (!Array.isArray(errors) || !errors.length) return textResult('No matching errors found in Brain.');
+      const lines = errors.slice(0, 10).map((e: AnyResult) =>
+        `#${e.id} [${e.errorType}] ${e.message?.slice(0, 100)}${e.resolved ? ' (resolved)' : ''}`
+      );
+      return textResult(`Errors from Brain matching "${params.search ?? params.pair}":\n${lines.join('\n')}`);
+    },
+  );
 }
