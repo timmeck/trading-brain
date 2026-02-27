@@ -178,6 +178,7 @@ trading query <text>       Search trades by fingerprint, pair, or bot type
 trading insights           Show research insights with severity
 trading rules              Show learned rules with confidence and win rate
 trading network            Explore the synapse network
+trading dashboard           Open interactive HTML dashboard in browser
 trading config             View and manage configuration
 trading export             Export all data as JSON
 trading import <file>      Import trades from JSON array
@@ -305,6 +306,20 @@ Each signal dimension is classified:
 - **Commander** — CLI framework
 - **Chalk** — Colored terminal output
 - **Winston** — Structured logging
+
+## Brain Ecosystem
+
+Trading Brain is part of the **Brain Ecosystem** — a family of standalone MCP servers that give Claude Code persistent, self-learning memory.
+
+| Brain | Purpose | Ports |
+|-------|---------|-------|
+| [Brain](https://github.com/timmeck/brain) | Error memory & code intelligence | 7777 / 7778 |
+| **Trading Brain** | Adaptive trading intelligence | **7779** / 7780 |
+| [Marketing Brain](https://github.com/timmeck/marketing-brain) | Content strategy & engagement | 7781 / 7782 |
+| [Brain Core](https://github.com/timmeck/brain-core) | Shared infrastructure (optional) | — |
+| [Brain Hub](https://timmeck.github.io/brain-hub/) | Ecosystem landing page | — |
+
+Each brain is **fully standalone** — [Brain Core](https://www.npmjs.com/package/@timmeck/brain-core) is an optional shared dependency that eliminates code duplication across brains.
 
 ## License
 
