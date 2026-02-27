@@ -16,16 +16,21 @@
     "test:coverage": "vitest --coverage"
   },
   "keywords": [
-    "trading-brain",
     "mcp",
+    "mcp-server",
+    "model-context-protocol",
+    "claude",
     "claude-code",
+    "cursor",
+    "windsurf",
+    "cline",
+    "ai-tools",
+    "trading",
+    "trading-intelligence",
+    "developer-tools",
     "hebbian-learning",
-    "spreading-activation",
     "wilson-score",
-    "adaptive-calibration",
-    "signal-fingerprinting",
-    "pattern-extraction",
-    "trading-intelligence"
+    "signal-fingerprinting"
   ],
   "author": "Tim Mecklenburg",
   "license": "MIT",

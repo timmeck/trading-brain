@@ -1,0 +1,10 @@
+startCommand:
+  type: stdio
+  configSchema:
+    type: object
+    properties: {}
+  commandFunction:
+    - runtime: node
+      entrypoint: dist/index.js
+      args:
+        - mcp-server
