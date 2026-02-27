@@ -1,0 +1,42 @@
+import { EventEmitter } from 'node:events';
+
+export interface TradingBrainEvents {
+  'trade:recorded': { tradeId: number; fingerprint: string; win: boolean };
+  'synapse:updated': { synapseId: string; weight: number };
+  'rule:learned': { ruleId: number; pattern: string; confidence: number };
+  'chain:detected': { pair: string; type: string; length: number };
+  'insight:created': { insightId: number; type: string };
+  'calibration:updated': { outcomeCount: number; learningRate: number };
+  'decay:applied': { synapseCount: number; edgeCount: number };
+  'patterns:extracted': { ruleCount: number };
+  'research:completed': { insightCount: number };
+}
+
+export type TradingBrainEventName = keyof TradingBrainEvents;
+
+export class TypedEventBus extends EventEmitter {
+  emit<K extends TradingBrainEventName>(event: K, data: TradingBrainEvents[K]): boolean {
+    return super.emit(event, data);
+  }
+
+  on<K extends TradingBrainEventName>(event: K, listener: (data: TradingBrainEvents[K]) => void): this {
+    return super.on(event, listener);
+  }
+
+  once<K extends TradingBrainEventName>(event: K, listener: (data: TradingBrainEvents[K]) => void): this {
+    return super.once(event, listener);
+  }
+
+  off<K extends TradingBrainEventName>(event: K, listener: (data: TradingBrainEvents[K]) => void): this {
+    return super.off(event, listener);
+  }
+}
+
+let busInstance: TypedEventBus | null = null;
+
+export function getEventBus(): TypedEventBus {
+  if (!busInstance) {
+    busInstance = new TypedEventBus();
+  }
+  return busInstance;
+}
