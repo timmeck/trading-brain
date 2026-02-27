@@ -12,6 +12,7 @@ import { exportCommand } from './cli/commands/export.js';
 import { importCommand } from './cli/commands/import.js';
 import { configCommand } from './cli/commands/config.js';
 import { doctorCommand } from './cli/commands/doctor.js';
+import { dashboardCommand } from './cli/commands/dashboard.js';
 
 const program = new Command();
 
@@ -31,6 +32,7 @@ program.addCommand(exportCommand());
 program.addCommand(importCommand());
 program.addCommand(configCommand());
 program.addCommand(doctorCommand());
+program.addCommand(dashboardCommand());
 
 // Hidden command: run MCP server (called by Claude Code)
 program
