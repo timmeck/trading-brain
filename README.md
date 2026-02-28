@@ -3,7 +3,7 @@
 [![npm version](https://img.shields.io/npm/v/@timmeck/trading-brain)](https://www.npmjs.com/package/@timmeck/trading-brain)
 [![npm downloads](https://img.shields.io/npm/dm/@timmeck/trading-brain)](https://www.npmjs.com/package/@timmeck/trading-brain)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![GitHub stars](https://img.shields.io/github/stars/timmeck/trading-brain)](https://github.com/timmeck/trading-brain)
+[![GitHub stars](https://img.shields.io/github/stars/timmeck/trading-brain?style=social)](https://github.com/timmeck/trading-brain)
 
 **Adaptive Trading Intelligence & Signal Learning System for Claude Code**
 
@@ -345,6 +345,13 @@ Brains discover and query each other at runtime via IPC named pipes. Use `tradin
 ### Ecosystem Dashboard
 
 The interactive HTML dashboard (`trading dashboard`) includes an Ecosystem Peers section showing the live status of all connected brains.
+
+## Support
+
+If Trading Brain helps you, consider giving it a star — it helps others discover the project and keeps development going.
+
+[![Star this repo](https://img.shields.io/github/stars/timmeck/trading-brain?style=social)](https://github.com/timmeck/trading-brain)
+[![Sponsor](https://img.shields.io/badge/Sponsor-Support%20Development-ea4aaa)](https://github.com/sponsors/timmeck)
 
 ## License
 
