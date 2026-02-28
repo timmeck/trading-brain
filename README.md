@@ -1,5 +1,7 @@
 # Trading Brain
 
+> **This repo has moved to [brain-ecosystem](https://github.com/timmeck/brain-ecosystem/tree/main/packages/trading-brain).** This repository is archived — all development continues in the monorepo. Install via `npm install -g @timmeck/trading-brain` (unchanged).
+
 [![npm version](https://img.shields.io/npm/v/@timmeck/trading-brain)](https://www.npmjs.com/package/@timmeck/trading-brain)
 [![npm downloads](https://img.shields.io/npm/dm/@timmeck/trading-brain)](https://www.npmjs.com/package/@timmeck/trading-brain)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
