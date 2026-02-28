@@ -10,6 +10,10 @@ export type TradingBrainEvents = {
   'decay:applied': { synapseCount: number; edgeCount: number };
   'patterns:extracted': { ruleCount: number };
   'research:completed': { insightCount: number };
+  'memory:created': { memoryId: number; category: string };
+  'memory:superseded': { oldId: number; newId: number };
+  'session:started': { sessionId: number };
+  'session:ended': { sessionId: number; summary: string };
 };
 
 export type TradingBrainEventName = keyof TradingBrainEvents;

@@ -45,6 +45,14 @@ Without Trading Brain, every trading decision starts from zero. With Trading Bra
 - **Performance Analysis** — Ranks pairs and strategies by statistical confidence
 - **Regime Shift Detection** — Alerts when a pair's recent performance deviates from its baseline
 
+### Never Forget — Memory & Sessions
+- **Persistent Memory** — Store preferences, decisions, context, facts, goals, and lessons learned
+- **Key-Based Upsert** — Update existing memories by unique key, auto-superseding old values
+- **Full-Text Search** — Natural language recall with FTS5-powered search
+- **Session Tracking** — Track conversation goals, summaries, and outcomes
+- **Importance Scoring** — 1–10 importance scale with category-based organization
+- **Soft Deletes** — Deactivate memories without losing history
+
 ### Strategy Recommendations
 - **DCA Multiplier** — Brain-recommended multiplier (0.3x–2.5x) based on regime and RSI context
 - **Grid Parameters** — Volatility-aware grid spacing with historical performance adjustment
@@ -208,6 +216,11 @@ These tools are available to Claude Code (and other MCP clients) when Trading Br
 | `trading_reset` | Reset all data (use with caution) |
 | `trading_ecosystem_status` | Get status of all brains in the ecosystem |
 | `trading_query_peer` | Query another brain in the ecosystem (method + params) |
+| `trading_remember` | Store a memory (preference, decision, context, fact, goal, lesson) |
+| `trading_recall` | Search memories by natural language query |
+| `trading_session_start` | Start a session with optional goals |
+| `trading_session_end` | End a session with summary and outcome |
+| `trading_session_history` | List past sessions with summaries |
 | `trading_error_context` | Query Brain for errors that correlate with trade failures |
 
 ## REST API
@@ -318,7 +331,7 @@ Trading Brain is part of the **Brain Ecosystem** — a family of standalone MCP 
 | Brain | Purpose | Ports |
 |-------|---------|-------|
 | [Brain](https://github.com/timmeck/brain) v2.2.0 | Error memory, code intelligence & persistent context | 7777 / 7778 |
-| **Trading Brain** | Adaptive trading intelligence | **7779** / 7780 |
+| **Trading Brain** v1.3.0 | Adaptive trading intelligence with memory & sessions | **7779** / 7780 |
 | [Marketing Brain](https://github.com/timmeck/marketing-brain) | Content strategy & engagement | 7781 / 7782 |
 | [Brain Core](https://github.com/timmeck/brain-core) v1.6.0 | Shared infrastructure (IPC, MCP, REST, CLI, math, synapses, memory) | — |
 | [Brain Hub](https://timmeck.github.io/brain-hub/) | Ecosystem landing page | — |

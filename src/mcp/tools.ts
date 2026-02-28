@@ -254,6 +254,108 @@ function registerToolsWithCaller(server: McpServer, call: BrainCall): void {
     },
   );
 
+  // === Memory & Session Tools ===
+
+  // 16. trading_remember
+  server.tool(
+    'trading_remember',
+    'Store a memory — preferences, decisions, context, facts, goals, or lessons learned from trading.',
+    {
+      content: z.string().describe('The memory content to store'),
+      category: z.enum(['preference', 'decision', 'context', 'fact', 'goal', 'lesson']).describe('Memory category'),
+      key: z.string().optional().describe('Unique key for upsert (updates existing memory with same key)'),
+      importance: z.number().min(1).max(10).optional().describe('Importance 1-10 (default 5)'),
+      tags: z.array(z.string()).optional().describe('Tags for organization'),
+    },
+    async (params) => {
+      const result: AnyResult = await call('memory.remember', {
+        content: params.content,
+        category: params.category,
+        key: params.key,
+        importance: params.importance,
+        tags: params.tags,
+      });
+      const msg = result.superseded
+        ? `Memory #${result.memoryId} stored (${params.category}), superseding #${result.superseded}`
+        : `Memory #${result.memoryId} stored (${params.category})`;
+      return textResult(msg);
+    },
+  );
+
+  // 17. trading_recall
+  server.tool(
+    'trading_recall',
+    'Search trading memories by natural language query. Returns matching memories sorted by relevance.',
+    {
+      query: z.string().describe('Natural language search query'),
+      category: z.enum(['preference', 'decision', 'context', 'fact', 'goal', 'lesson']).optional().describe('Filter by category'),
+      limit: z.number().optional().describe('Max results (default 10)'),
+    },
+    async (params) => {
+      const results: AnyResult = await call('memory.recall', {
+        query: params.query,
+        category: params.category,
+        limit: params.limit,
+      });
+      if (!Array.isArray(results) || results.length === 0) return textResult('No memories found.');
+      const lines = results.map((m: AnyResult) =>
+        `#${m.id} [${m.category}] ${m.content.slice(0, 200)}${m.key ? ` (key: ${m.key})` : ''}`
+      );
+      return textResult(`Found ${results.length} memory/memories:\n${lines.join('\n')}`);
+    },
+  );
+
+  // 18. trading_session_start
+  server.tool(
+    'trading_session_start',
+    'Start a new trading session. Track goals and context for the conversation.',
+    {
+      goals: z.array(z.string()).optional().describe('Session goals'),
+    },
+    async (params) => {
+      const result: AnyResult = await call('session.start', {
+        goals: params.goals,
+      });
+      return textResult(`Session #${result.sessionId} started (${result.dbSessionId})`);
+    },
+  );
+
+  // 19. trading_session_end
+  server.tool(
+    'trading_session_end',
+    'End a trading session with a summary of what was accomplished.',
+    {
+      session_id: z.number().describe('Session ID to end'),
+      summary: z.string().describe('Summary of what was accomplished'),
+      outcome: z.enum(['completed', 'paused', 'abandoned']).optional().describe('Session outcome (default: completed)'),
+    },
+    async (params) => {
+      await call('session.end', {
+        sessionId: params.session_id,
+        summary: params.summary,
+        outcome: params.outcome,
+      });
+      return textResult(`Session #${params.session_id} ended (${params.outcome ?? 'completed'})`);
+    },
+  );
+
+  // 20. trading_session_history
+  server.tool(
+    'trading_session_history',
+    'List past trading sessions with summaries and outcomes.',
+    {
+      limit: z.number().optional().describe('Max results (default 10)'),
+    },
+    async (params) => {
+      const sessions: AnyResult = await call('session.history', { limit: params.limit ?? 10 });
+      if (!Array.isArray(sessions) || sessions.length === 0) return textResult('No sessions found.');
+      const lines = sessions.map((s: AnyResult) =>
+        `#${s.id} [${s.outcome ?? 'active'}] ${s.summary ?? '(no summary)'} — ${s.started_at}`
+      );
+      return textResult(`${sessions.length} session(s):\n${lines.join('\n')}`);
+    },
+  );
+
   // === Cross-Brain Ecosystem Tools ===
 
   server.tool(

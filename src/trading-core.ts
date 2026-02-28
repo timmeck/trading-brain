@@ -17,6 +17,8 @@ import { RuleRepository } from './db/repositories/rule.repository.js';
 import { ChainRepository } from './db/repositories/chain.repository.js';
 import { InsightRepository } from './db/repositories/insight.repository.js';
 import { CalibrationRepository } from './db/repositories/calibration.repository.js';
+import { MemoryRepository } from './db/repositories/memory.repository.js';
+import { SessionRepository } from './db/repositories/session.repository.js';
 
 // Graph
 import { WeightedGraph } from './graph/weighted-graph.js';
@@ -31,6 +33,7 @@ import { StrategyService } from './services/strategy.service.js';
 import { SynapseService } from './services/synapse.service.js';
 import { AnalyticsService } from './services/analytics.service.js';
 import { InsightService } from './services/insight.service.js';
+import { MemoryService } from './services/memory.service.js';
 
 // Engines
 import { LearningEngine } from './learning/learning-engine.js';
@@ -93,6 +96,8 @@ export class TradingCore {
     const chainRepo = new ChainRepository(this.db);
     const insightRepo = new InsightRepository(this.db);
     const calibrationRepo = new CalibrationRepository(this.db);
+    const memoryRepo = new MemoryRepository(this.db);
+    const sessionRepo = new SessionRepository(this.db);
 
     // 6. Synapse Manager
     const synapseManager = new SynapseManager(synapseRepo, config.calibration);
@@ -114,13 +119,15 @@ export class TradingCore {
     const tradeCount = () => tradeRepo.count();
 
     // 9. Services
+    const memoryService = new MemoryService(memoryRepo, sessionRepo);
     const services: Services = {
       trade: new TradeService(tradeRepo, signalRepo, chainRepo, synapseManager, graph, cal, config.learning),
       signal: new SignalService(synapseManager, graph, cal, tradeCount),
       strategy: new StrategyService(synapseManager, graph, cal, tradeCount),
       synapse: new SynapseService(synapseManager, graph),
-      analytics: new AnalyticsService(tradeRepo, ruleRepo, chainRepo, insightRepo, synapseManager, graph),
+      analytics: new AnalyticsService(tradeRepo, ruleRepo, chainRepo, insightRepo, synapseManager, graph, memoryRepo, sessionRepo),
       insight: new InsightService(insightRepo),
+      memory: memoryService,
       ruleRepo,
       chainRepo,
       calRepo: calibrationRepo,

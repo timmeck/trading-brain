@@ -5,6 +5,7 @@ import type { StrategyService } from '../services/strategy.service.js';
 import type { SynapseService } from '../services/synapse.service.js';
 import type { AnalyticsService } from '../services/analytics.service.js';
 import type { InsightService } from '../services/insight.service.js';
+import type { MemoryService } from '../services/memory.service.js';
 import type { LearningEngine } from '../learning/learning-engine.js';
 import type { ResearchEngine } from '../research/research-engine.js';
 import type { RuleRepository } from '../db/repositories/rule.repository.js';
@@ -21,6 +22,7 @@ export interface Services {
   synapse: SynapseService;
   analytics: AnalyticsService;
   insight: InsightService;
+  memory: MemoryService;
   ruleRepo: RuleRepository;
   chainRepo: ChainRepository;
   calRepo: CalibrationRepository;
@@ -96,6 +98,19 @@ export class IpcRouter {
       // ─── Calibration ────────────────────────────────────
       ['calibration.get', () => s.learning?.getCalibration() ?? s.calRepo.get()],
 
+      // ─── Memory ──────────────────────────────────────────
+      ['memory.remember', (params) => s.memory.remember(p(params))],
+      ['memory.recall', (params) => s.memory.recall(p(params))],
+      ['memory.forget', (params) => s.memory.forget(p(params).memoryId ?? p(params).memory_id)],
+      ['memory.preferences', () => s.memory.getPreferences()],
+      ['memory.decisions', () => s.memory.getDecisions()],
+      ['memory.goals', () => s.memory.getGoals()],
+      ['memory.lessons', () => s.memory.getLessons()],
+      ['memory.stats', () => s.memory.getStats()],
+      ['session.start', (params) => s.memory.startSession(p(params))],
+      ['session.end', (params) => s.memory.endSession(p(params))],
+      ['session.history', (params) => s.memory.getSessionHistory(p(params).limit)],
+
       // ─── Analytics ──────────────────────────────────────
       ['analytics.summary', () => s.analytics.getSummary()],
 
@@ -135,7 +150,7 @@ export class IpcRouter {
       // ─── Status (cross-brain) ─────────────────────────────
       ['status', () => ({
         name: 'trading-brain',
-        version: '1.1.0',
+        version: '1.3.0',
         uptime: Math.floor(process.uptime()),
         pid: process.pid,
         methods: this.listMethods().length,
