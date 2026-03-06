@@ -38,6 +38,9 @@ import { MemoryService } from './services/memory.service.js';
 // Engines
 import { LearningEngine } from './learning/learning-engine.js';
 import { ResearchEngine } from './research/research-engine.js';
+import { PaperEngine } from './paper/paper-engine.js';
+import { PaperService } from './paper/paper.service.js';
+import { PaperRepository } from './db/repositories/paper.repository.js';
 
 // IPC
 import { IpcRouter, type Services } from './ipc/router.js';
@@ -57,6 +60,7 @@ export class TradingCore {
   private mcpHttpServer: McpHttpServer | null = null;
   private learningEngine: LearningEngine | null = null;
   private researchEngine: ResearchEngine | null = null;
+  private paperEngine: PaperEngine | null = null;
   private crossBrain: CrossBrainClient | null = null;
   private notifier: CrossBrainNotifier | null = null;
   private config: TradingBrainConfig | null = null;
@@ -156,6 +160,16 @@ export class TradingCore {
     this.researchEngine.start();
     logger.info(`Research engine started (interval: ${config.research.intervalMs}ms)`);
 
+    // 12. Paper Trading Engine
+    const paperRepo = new PaperRepository(this.db);
+    this.paperEngine = new PaperEngine(config.paper, services.trade, services.signal, paperRepo);
+    this.paperEngine.start();
+    const paperService = new PaperService(this.paperEngine, paperRepo, config.paper);
+    services.paper = paperService;
+    if (config.paper.enabled) {
+      logger.info(`Paper trading engine started (interval: ${config.paper.intervalMs}ms)`);
+    }
+
     // Expose engines + cross-brain to IPC
     services.learning = this.learningEngine;
     services.research = this.researchEngine;
@@ -222,6 +236,7 @@ export class TradingCore {
   }
 
   private cleanup(): void {
+    this.paperEngine?.stop();
     this.researchEngine?.stop();
     this.learningEngine?.stop();
     this.mcpHttpServer?.stop();
@@ -235,6 +250,7 @@ export class TradingCore {
     this.mcpHttpServer = null;
     this.learningEngine = null;
     this.researchEngine = null;
+    this.paperEngine = null;
   }
 
   restart(): void {

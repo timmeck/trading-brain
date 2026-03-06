@@ -12,6 +12,7 @@ import type { RuleRepository } from '../db/repositories/rule.repository.js';
 import type { ChainRepository } from '../db/repositories/chain.repository.js';
 import type { CalibrationRepository } from '../db/repositories/calibration.repository.js';
 import type { CrossBrainClient } from '@timmeck/brain-core';
+import type { PaperService } from '../paper/paper.service.js';
 
 const logger = getLogger();
 
@@ -29,9 +30,10 @@ export interface Services {
   learning?: LearningEngine;
   research?: ResearchEngine;
   crossBrain?: CrossBrainClient;
+  paper?: PaperService;
 }
 
-type MethodHandler = (params: unknown) => unknown;
+type MethodHandler = (params: unknown) => unknown | Promise<unknown>;
 
 export class IpcRouter {
   private methods: Map<string, MethodHandler>;
@@ -40,7 +42,7 @@ export class IpcRouter {
     this.methods = this.buildMethodMap();
   }
 
-  handle(method: string, params: unknown): unknown {
+  handle(method: string, params: unknown): unknown | Promise<unknown> {
     const handler = this.methods.get(method);
     if (!handler) {
       throw new Error(`Unknown method: ${method}`);
@@ -119,6 +121,15 @@ export class IpcRouter {
 
       // ─── Research ───────────────────────────────────────
       ['research.run', () => s.research?.runManual()],
+
+      // ─── Paper Trading ────────────────────────────────────
+      ['paper.status', () => s.paper?.getStatus()],
+      ['paper.portfolio', () => s.paper?.getPortfolio()],
+      ['paper.history', (params) => s.paper?.getHistory(p(params).limit)],
+      ['paper.cycle', () => s.paper?.runManualCycle()],
+      ['paper.pause', () => s.paper?.pause()],
+      ['paper.resume', () => s.paper?.resume()],
+      ['paper.reset', () => s.paper?.reset()],
 
       // ─── Reset ──────────────────────────────────────────
       ['reset', () => {
