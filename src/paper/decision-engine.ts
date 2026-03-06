@@ -149,8 +149,12 @@ export class DecisionEngine {
     // Don't enter in bearish regime
     if (regime === 'bearish_trend') return false;
 
+    // Cold-start: when brain has no data, confidence is 0 — use a lower threshold
+    const coldStart = confidence === 0;
+    const confThreshold = coldStart ? 0.3 : this.config.confidenceThreshold;
+
     // Confidence threshold
-    if (confidence < this.config.confidenceThreshold) {
+    if (confidence < confThreshold) {
       // Still allow if strong technical signal
       const hasBullishDiv = indicators.rsi14 < 30 && indicators.macd.line > 0;
       const hasStrongTrend = indicators.trendScore > 2 && indicators.volatility < 60;
